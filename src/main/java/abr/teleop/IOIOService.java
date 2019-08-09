@@ -1,10 +1,12 @@
 package abr.teleop;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -20,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class IOIOService extends AsyncTask<Void, Void, Void> {
 	private static final String TAG = "CameraRobot-IOIOService";
@@ -42,6 +45,10 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 	public static final int MESSAGE_PT_MOVE = 20;
 
 	public static final int MESSAGE_LOG = 21;
+	public static final int MESSAGE_RLTURN = 22;
+	public static final int MESSAGE_RLINIT = 23;
+	public static final int MESSAGE_RLTILTPERIOD = 24;
+
 
 	Boolean TASK_STATE = true;
 	ServerSocket ss;
@@ -65,68 +72,7 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 	}
 
 	byte[] buff;
-	protected Void doInBackground(Void... params) {  
-
-		Runnable run = new Runnable() {
-			public void run() {
-
-				try {
-					byte[] message = new byte[12];
-					DatagramPacket p = new DatagramPacket(message, message.length);
-					DatagramSocket s = new DatagramSocket(null);
-					s.setReuseAddress(true);
-					s.setBroadcast(true);
-					s.bind(new InetSocketAddress(21111));
-
-					while(TASK_STATE) {
-						try {		
-							s.setSoTimeout(3000);
-							s.receive(p);
-							String text = new String(message, 0, p.getLength());
-
-							//							Log.e("IOIO", "msg received:" + text);
-
-							if(text.substring(0, 2).equals("MC")) 
-							{
-								String[] array = text.split("/");
-
-								int speed = Integer.parseInt(array[1]);
-								int steering = Integer.parseInt(array[2]);
-
-								mHandler.obtainMessage(MESSAGE_MOVE, speed, steering).sendToTarget();								
-
-							} 
-							else if(text.substring(0, 2).equals("SS")) {
-								mHandler.obtainMessage(MESSAGE_STOP).sendToTarget();
-							} else if(text.substring(0, 5).equals("PT_SS")) {
-								mHandler.obtainMessage(MESSAGE_PT_STOP).sendToTarget();
-							} else
-							{
-								String[] array = text.split("/");
-								if(array[0].equals("PT"))
-								{
-									int pan = Integer.parseInt(array[1]);
-									int tilt = Integer.parseInt(array[2]);
-
-									mHandler.obtainMessage(MESSAGE_PT_MOVE, pan, tilt).sendToTarget();									
-								}
-							}
-						} catch (SocketException e) {
-							e.printStackTrace();
-						} catch (SocketTimeoutException e) {
-							//e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					s.close();
-					Log.e(TAG, "Kill Task");
-				} catch (SocketException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		new Thread(run).start();
+	protected Void doInBackground(Void... params) {
 
 		try {
 			ss = new ServerSocket(21111);
@@ -137,53 +83,57 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 					s = ss.accept();
 					s.setSoTimeout(2000);
 				} catch (InterruptedIOException e) {
-					Log.i(TAG, "Waiting for connect");
 				} catch (SocketException e) {
 					Log.w(TAG, e.toString());
 				}
 			}
 
+			Log.i(TAG, "Waiting for password");
 			if(TASK_STATE) {
 				in = s.getInputStream();
 				dis = new DataInputStream(in);
-				int size = dis.readInt();
-				buff = new byte[size];
+				buff = new byte[3];  //limit password to 3 bytes
 				dis.readFully(buff);
-
-				if((new String(buff)).equals(mPassword)) {
+				if (new String(buff).equals(mPassword)){
 					mHandler.obtainMessage(MESSAGE_PASS, s).sendToTarget();
 				} else {
 					mHandler.obtainMessage(MESSAGE_WRONG, s).sendToTarget();
 				}
-				Log.w(TAG, "Accept");
 			}
-
 		} catch (IOException e) {
 			Log.w(TAG, e.toString());
 		}
+		Log.i(TAG, "wait for set speed");
+		try {
+			int speed = dis.readInt();
+			int steps_done = dis.readInt();
+			Log.i("speed, steps_done", Integer.toString(speed) + Integer.toString(steps_done));
+			mHandler.obtainMessage(MESSAGE_RLINIT, speed, steps_done).sendToTarget();
+		} catch (IOException e) {
+			Log.e(TAG, e.toString());
+		}
+		try {
+			int tilt = dis.readInt();
+			int period = dis.readInt();
+			Log.i("speed, steps_done", Integer.toString(tilt) + Integer.toString(period));
+			mHandler.obtainMessage(MESSAGE_RLTILTPERIOD, tilt, period).sendToTarget();
+		} catch (IOException e) {
+			Log.e(TAG, e.toString());
+		}
+		Log.i(TAG, "wait for start");
 
 		while(TASK_STATE) {
 			try {
-				int size = dis.readInt();
-				buff = new byte[size];
-				dis.readFully(buff);
-				String data = new String(buff);
-
-				if(data.equals("Snap")) {
-					mHandler.obtainMessage(MESSAGE_SNAP).sendToTarget();
-				} else if(data.equals("LEDON") || data.equals("LEDOFF")) {
-					mHandler.obtainMessage(MESSAGE_FLASH, data).sendToTarget();
-				} else if(data.equals("LOGON") || data.equals("LOGOFF")) {
-					mHandler.obtainMessage(MESSAGE_LOG, data).sendToTarget();
-				} else if(data.equals("Focus")) {
-					mHandler.obtainMessage(MESSAGE_FOCUS).sendToTarget();
-				} 
+				int step = dis.readInt();
+				int turn = dis.readInt();
+				Log.i("receive action", ""+step+","+turn);
+				mHandler.obtainMessage(MESSAGE_RLTURN, step, turn).sendToTarget();
 			} catch (EOFException e) { 
 				Log.w(TAG, e.toString());
 				mHandler.obtainMessage(MESSAGE_CLOSE).sendToTarget();
 				break;
 			} catch (SocketTimeoutException e) { 
-				Log.w(TAG, e.toString());
+				// Log.w(TAG, e.toString());
 			} catch (IOException e) { 
 				Log.w(TAG, e.toString());
 			} 

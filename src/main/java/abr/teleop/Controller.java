@@ -211,8 +211,9 @@ public class Controller extends Activity{
 							, "Logging on"
 							, Toast.LENGTH_SHORT).show();
 					cbLog.setBackgroundResource(R.drawable.log_pressed);
-					pwm_speed = 1550;
+					pwm_speed = 1600;
 					send("MC/" + pwm_speed + "/" + pwm_steering);
+					Log.i("MC","send log on");
 				} else {
 					sendString("LOGOFF");
 					Toast.makeText(getApplicationContext()
@@ -221,6 +222,7 @@ public class Controller extends Activity{
 					cbLog.setBackgroundResource(R.drawable.log_normal);
 					pwm_speed = 1500;
 					send("MC/" + pwm_speed + "/" + pwm_steering);
+					Log.i("MC","send log off");
 				}
 			}
 		});
@@ -308,6 +310,9 @@ public class Controller extends Activity{
 			}
 		};
 		new Thread(readThread).start();
+
+		send("MC/" + 1500 + "/" + 1500);
+
 	}
 	
 	public void onPause() {
