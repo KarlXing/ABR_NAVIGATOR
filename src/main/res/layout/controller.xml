@@ -1,77 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="#fffbd5">
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+
 
     <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/command_button_layout_margin"
-        android:orientation="horizontal" >
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/cbLog"
-            android:layout_width="@dimen/command_button_size"
-            android:layout_height="@dimen/command_button_size"
-            android:layout_margin="@dimen/command_button_margin"
-            android:background="@drawable/log_normal"
-            android:button="@null" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btnAutoFocus"
-            android:layout_width="@dimen/command_button_size"
-            android:layout_height="@dimen/command_button_size"
-            android:layout_margin="@dimen/command_button_margin"
-            android:background="@drawable/button_focus" />
+            <Button
+                android:id="@+id/starttask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/connection_text_size"
+                android:layout_weight="1"
+                android:onClick="switchTaskstate"
+                android:text="START" />
 
-        <Button
-            android:id="@+id/btnPhotoSnap"
-            android:layout_width="@dimen/command_button_size"
-            android:layout_height="@dimen/command_button_size"
-            android:layout_margin="@dimen/command_button_margin"
-            android:background="@drawable/button_snap" />
+            <Button
+                android:id="@+id/stoptask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/connection_text_size"
+                android:layout_weight="1"
+                android:onClick="switchTaskstate"
+                android:text="STOP " />
 
-        <CheckBox
-            android:id="@+id/cbFlash"
-            android:layout_width="@dimen/command_button_size"
-            android:layout_height="@dimen/command_button_size"
-            android:layout_margin="@dimen/command_button_margin"
-            android:background="@drawable/checkbox_flash"
-            android:button="@null" />
+            <Button
+                android:id="@+id/roadfollow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/connection_text_size"
+                android:layout_weight="1"
+                android:onClick="switchNavigation"
+                android:text="roadfollow" />
+
+            <Button
+                android:id="@+id/gpsmode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/connection_text_size"
+                android:layout_weight="1"
+                android:onClick="switchNavigation"
+                android:text="gpsmode" />
+
+            <Button
+                android:id="@+id/dest_plus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/connection_text_size"
+                android:layout_weight="1"
+                android:onClick="wpPlus"
+                android:text="WPPLUS" />
+
+            <Button
+                android:id="@+id/adddt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/connection_text_size"
+                android:layout_weight="1"
+                android:onClick="disthp"
+                android:text="add DT" />
+
+            <Button
+                android:id="@+id/minusdt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/connection_text_size"
+                android:layout_weight="1"
+                android:onClick="disthm"
+                android:text="minus DT" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/layout_joystick"
-        android:layout_width="@dimen/controller_size"
-        android:layout_height="@dimen/controller_size"
-        android:layout_above="@+id/linearLayout1"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="@dimen/controller_margin"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="30dp"
-        android:background="@drawable/image_button_bg" >
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/layout_joystick2"
-        android:layout_width="@dimen/controller_size"
-        android:layout_height="@dimen/controller_size"
-        android:layout_above="@+id/linearLayout1"
-        android:layout_alignRight="@+id/linearLayout1"
-        android:layout_margin="@dimen/controller_margin"
-        android:layout_marginBottom="38dp"
-        android:background="@drawable/image_button_bg" >
-    </RelativeLayout>
 
 </RelativeLayout>

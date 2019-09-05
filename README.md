@@ -1,3 +1,3 @@
-ABR_Template
+ABR_NAVIGATOR
 ==============
-Template app for accessing different features of ABR robot control. Uncomment sections as needed.
+This is an app used for auto navigation based on deep reinforcement learning and neuromodulation.

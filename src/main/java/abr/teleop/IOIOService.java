@@ -48,6 +48,16 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 	public static final int MESSAGE_RLTURN = 22;
 	public static final int MESSAGE_RLINIT = 23;
 	public static final int MESSAGE_RLTILTPERIOD = 24;
+	public static final int MESSAGE_NAVIGATEON = 25;
+	public static final int MESSAGE_NAVIGATEOFF = 26;
+	public static final int MESSAGE_DELAY = 27;
+	public static final int MESSAGE_WPPLUS = 28;
+	public static final int MESSAGE_START = 29;
+	public static final int MESSAGE_DISTHPLUS = 30;
+	public static final int MESSAGE_DISTHMINUS = 31;
+
+
+
 
 
 	Boolean TASK_STATE = true;
@@ -74,6 +84,65 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 	byte[] buff;
 	protected Void doInBackground(Void... params) {
 
+		Runnable run = new Runnable() {
+			public void run() {
+
+				try {
+					byte[] message = new byte[6];
+					DatagramPacket p = new DatagramPacket(message, message.length);
+					DatagramSocket s = new DatagramSocket(null);
+					s.setReuseAddress(true);
+					s.setBroadcast(true);
+					s.bind(new InetSocketAddress(21111));
+
+					while(TASK_STATE) {
+						try {
+							s.setSoTimeout(500);
+							s.receive(p);
+							String text = new String(message, 0, p.getLength());
+
+							//							Log.e("IOIO", "msg received:" + text);
+
+							if(text.substring(0, 2).equals("MC"))
+							{
+								int steering = Integer.parseInt(text.substring(2, 6));
+								Log.i("text", text.substring(2,6)+steering);
+
+								mHandler.obtainMessage(MESSAGE_MOVE, steering, steering).sendToTarget();
+
+							} else if(text.equals("NAVION")) {
+								mHandler.obtainMessage(MESSAGE_NAVIGATEON).sendToTarget();
+							} else if(text.equals("NAVIOF")) {
+								mHandler.obtainMessage(MESSAGE_NAVIGATEOFF).sendToTarget();
+							} else if(text.substring(0,4).equals("STOP")) {
+								mHandler.obtainMessage(MESSAGE_STOP).sendToTarget();
+							} else if(text.substring(0,5).equals("START")) {
+								mHandler.obtainMessage(MESSAGE_START).sendToTarget();
+							} else if(text.equals("WPPLUS")) {
+								mHandler.obtainMessage(MESSAGE_WPPLUS).sendToTarget();
+							} else if(text.equals("DISTHP")) {
+								mHandler.obtainMessage(MESSAGE_DISTHPLUS).sendToTarget();
+							} else if(text.equals("DISTHM")) {
+								mHandler.obtainMessage(MESSAGE_DISTHMINUS).sendToTarget();
+							}
+						} catch (SocketException e) {
+							e.printStackTrace();
+						} catch (SocketTimeoutException e) {
+							//e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					s.close();
+					Log.e(TAG, "Kill Task");
+				} catch (SocketException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		new Thread(run).start();
+
+
 		try {
 			ss = new ServerSocket(21111);
 			ss.setSoTimeout(2000);
@@ -81,7 +150,7 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 			while(s == null && TASK_STATE) {
 				try {
 					s = ss.accept();
-					s.setSoTimeout(2000);
+					s.setSoTimeout(1000);
 				} catch (InterruptedIOException e) {
 				} catch (SocketException e) {
 					Log.w(TAG, e.toString());
@@ -95,7 +164,18 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 				buff = new byte[3];  //limit password to 3 bytes
 				dis.readFully(buff);
 				if (new String(buff).equals(mPassword)){
+					Log.i(TAG,"pass match");
 					mHandler.obtainMessage(MESSAGE_PASS, s).sendToTarget();
+
+//					boolean delay = true;
+//					try {
+//						delay = s.getTcpNoDelay();
+//					} catch (SocketException e) {
+//						Log.i("socket delay", e.toString());
+//					}
+//					Log.i(TAG, "delay is"+delay);
+                    s.setTcpNoDelay(true);
+
 				} else {
 					mHandler.obtainMessage(MESSAGE_WRONG, s).sendToTarget();
 				}
@@ -103,6 +183,7 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 		} catch (IOException e) {
 			Log.w(TAG, e.toString());
 		}
+
 		Log.i(TAG, "wait for set speed");
 		try {
 			int speed = dis.readInt();
@@ -115,12 +196,13 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 		try {
 			int tilt = dis.readInt();
 			int period = dis.readInt();
-			Log.i("speed, steps_done", Integer.toString(tilt) + Integer.toString(period));
+			Log.i("tilt, period", Integer.toString(tilt) + Integer.toString(period));
 			mHandler.obtainMessage(MESSAGE_RLTILTPERIOD, tilt, period).sendToTarget();
 		} catch (IOException e) {
 			Log.e(TAG, e.toString());
 		}
 		Log.i(TAG, "wait for start");
+
 
 		while(TASK_STATE) {
 			try {
@@ -128,7 +210,7 @@ public class IOIOService extends AsyncTask<Void, Void, Void> {
 				int turn = dis.readInt();
 				Log.i("receive action", ""+step+","+turn);
 				mHandler.obtainMessage(MESSAGE_RLTURN, step, turn).sendToTarget();
-			} catch (EOFException e) { 
+			} catch (EOFException e) {
 				Log.w(TAG, e.toString());
 				mHandler.obtainMessage(MESSAGE_CLOSE).sendToTarget();
 				break;

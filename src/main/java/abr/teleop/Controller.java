@@ -2,38 +2,28 @@ package abr.teleop;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class Controller extends Activity{
 	private final static String TAG = "CameraRobot-Controller";
@@ -78,260 +68,85 @@ public class Controller extends Activity{
         
 		ip = getIntent().getExtras().getString("IP");
 		pass = getIntent().getExtras().getString("Pass");
-		
-		imageView1 = (ImageView)findViewById(R.id.imageView1);
-		
-//		layout_joystick = (RelativeLayout)findViewById(R.id.layout_joystick);
-//	    js = new JoyStickClass(getApplicationContext()
-//        		, layout_joystick, R.drawable.image_button);
-//	    js.setStickSize(screenHeight / 7, screenHeight / 7);
-//	    js.setLayoutSize(screenHeight / 2, screenHeight / 2);
-//	    js.setLayoutAlpha(50);
-//	    js.setStickAlpha(255);
-//	    js.setOffset((int)((screenHeight / 9) * 0.6));
-//	    js.setMinimumDistance((int)((screenHeight / 9) * 0.6));
-	    
-//	    layout_joystick.setOnTouchListener(new OnTouchListener() {
-//	    	long time = System.currentTimeMillis();
-//			public boolean onTouch(View arg0, MotionEvent arg1) {
-//				/*
-//				js.drawStick(arg1);
-//				if(arg1.getAction() == MotionEvent.ACTION_DOWN) {
-//					command();
-//				} else if(arg1.getAction() == MotionEvent.ACTION_MOVE) {
-//					if(System.currentTimeMillis() - time > 200) {
-//						command();
-//						time = System.currentTimeMillis();
-//					}
-//				} else if(arg1.getAction() == MotionEvent.ACTION_UP) {
-//					//send("SS");
-//					//send("SS");
-//					pwm_speed = 1500;
-//					send("MC/" + pwm_speed + "/" + pwm_steering);
-//				}
-//				*/
-//				return true;
-//			}
-//
-//			public void command()
-//			{
-//				pwm_speed = 1500 - (int)(250*js.getnormY());		//reverse Y
-//
-//				/*
-//				if(pwm_speed < 1500)
-//					pwm_steering = 1500 + (int)(500*js.getnormX());    //reverse X
-//				else
-//					pwm_steering = 1500 - (int)(500*js.getnormX());    //reverse X
-//				*/
-//				send("MC/" + pwm_speed + "/" + pwm_steering);
-//			}
-//        });
-//
-	    
-	    //***********************************  added joystick for pan and tilt unit control   *************************************/
-	    layout_joystick_PT = (RelativeLayout)findViewById(R.id.layout_joystick2);
-	    js_PT = new JoyStickClass(getApplicationContext()
-        		, layout_joystick_PT, R.drawable.image_button);
-	    js_PT.setStickSize(screenHeight / 7, screenHeight / 7);
-	    js_PT.setLayoutSize(screenHeight / 2, screenHeight / 2);
-	    js_PT.setLayoutAlpha(50);
-	    js_PT.setStickAlpha(255);
-	    js_PT.setOffset((int)((screenHeight / 9) * 0.6));
-//	    js_PT.setMinimumDistance((int)((screenHeight / 9) * 0.6));
-	    
-	    layout_joystick_PT.setOnTouchListener(new OnTouchListener() {
-	    	long time = System.currentTimeMillis();
-			public boolean onTouch(View arg0, MotionEvent arg1) {
-				js_PT.drawStick(arg1);
-				if(arg1.getAction() == MotionEvent.ACTION_DOWN) {
-					command();
-				} else if(arg1.getAction() == MotionEvent.ACTION_MOVE) {
-//					if(System.currentTimeMillis() - time > 200) {
-						command();
-//						time = System.currentTimeMillis(); 
-//					}
-				} else if(arg1.getAction() == MotionEvent.ACTION_UP) {
-					//send("PT_SS");
-					//send("PT_SS");
-					pwm_steering = 1500;
-					send("MC/" + pwm_speed + "/" + pwm_steering);
-				}
-				return true;
-			}
-			
-			public void command() 
-			{				
-				//int pwm_pan = 1500 + (int)(500*js_PT.getnormX());
-				//int pwm_tilt = 1500 + (int)(500*js_PT.getnormY());
 
-				pwm_steering = 1500 + (int)(200*js_PT.getnormX());
+	}
 
-//				Log.e("controller", "pwm_pan: " + pwm_pan + " pwm_tilt: " + pwm_tilt);
-				
-				//send("PT/" + pwm_pan + "/" + pwm_tilt);
-				send("MC/" + pwm_speed + "/" + pwm_steering);
-			}
-        });
-	    
-	    //******************************************************************************************************************/
-	    
-	    
-	    
-	    Button buttonSnap = (Button)findViewById(R.id.btnPhotoSnap);
-	    buttonSnap.setOnClickListener(new OnClickListener() {
-	    	public void onClick(View v) {
-				sendString("Snap");
-	    	}
-	    });
-	    
-	    Button buttonFocus = (Button)findViewById(R.id.btnAutoFocus);
-	    buttonFocus.setOnClickListener(new OnClickListener() {
-	    	public void onClick(View v) {
-				sendString("Focus");
-	    	}
-	    });
-        
-        cbFlash = (CheckBox)findViewById(R.id.cbFlash);
-        cbFlash.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				if(arg1) {
-					sendString("LEDON");
-				} else {
-					sendString("LEDOFF");
-				}
-			}
-        });
+//	public void doTurn(View view) {
+//		int id = view.getId();
+//		if (id == R.id.turn1){
+//			send("MC"+1400);
+//		} else if (id == R.id.turn2) {
+//			send("MC" + 1425);
+//		} else if (id == R.id.turn3) {
+//			send("MC"+1450);
+//		} else if (id == R.id.turn4) {
+//			send("MC"+1500);
+//		} else if (id == R.id.turn5) {
+//			send("MC"+1550);
+//		} else if (id == R.id.turn6) {
+//			send("MC"+1575);
+//		} else {
+//			send("MC"+1600);
+//		}
+//	}
 
-		cbLog = (CheckBox)findViewById(R.id.cbLog);
-		cbLog.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				if(arg1) {
-					sendString("LOGON");
-					Toast.makeText(getApplicationContext()
-							, "Logging on"
-							, Toast.LENGTH_SHORT).show();
-					cbLog.setBackgroundResource(R.drawable.log_pressed);
-					pwm_speed = 1600;
-					send("MC/" + pwm_speed + "/" + pwm_steering);
-					Log.i("MC","send log on");
-				} else {
-					sendString("LOGOFF");
-					Toast.makeText(getApplicationContext()
-							, "Logging off"
-							, Toast.LENGTH_SHORT).show();
-					cbLog.setBackgroundResource(R.drawable.log_normal);
-					pwm_speed = 1500;
-					send("MC/" + pwm_speed + "/" + pwm_steering);
-					Log.i("MC","send log off");
-				}
-			}
-		});
-		
-		Runnable readThread = new Runnable() {
-			Bitmap bitmap;
-			
-			public void run() {
-				try {
-					s = new Socket();
-					s.connect((new InetSocketAddress(InetAddress.getByName(ip), 21111)), 5000);
+	public void switchNavigation(View view) {
+		int id = view.getId();
+		if (id == R.id.roadfollow) {
+			send("NAVION");
+		} else {
+			send("NAVIOF");
+		}
+	}
 
-					out = s.getOutputStream(); 
-					dos = new DataOutputStream(out);
+	public void switchTaskstate(View view) {
+		int id = view.getId();
+		if (id == R.id.starttask){
+			send("START!");
+		} else {
+			send("STOP!!");
+		}
+	}
 
-					in = s.getInputStream();
-				    dis = new DataInputStream(in);
-					sendString(pass);
-					
-					while(task_state) {
-						try {
-							int size = dis.readInt();
-							final byte[] buff = new byte[size];
-							dis.readFully(buff);
-							runOnUiThread(new Runnable() {
-					    		public void run() {
-									if(buff.length > 0 && buff.length < 20) {
-										if(new String(buff).equals("Snap")) {
-											Toast.makeText(getApplicationContext()
-													, "Take a photo"
-													, Toast.LENGTH_SHORT).show();		
-										} else if(new String(buff).equals("WRONG")) {
-											Toast.makeText(getApplicationContext()
-							    					, "Wrong Password", Toast.LENGTH_SHORT).show();
-											finish();
-										} else if(new String(buff).equals("ACCEPT")) {
-									    	Toast.makeText(getApplicationContext()
-									    			, "Connection accepted"
-									    			, Toast.LENGTH_SHORT).show();	
-										} else if(new String(buff).equals("NoFlash")) {
-											Toast.makeText(getApplicationContext()
-									    			, "Device not support flash"
-									    			, Toast.LENGTH_SHORT).show();
-										}								    		
-						    		} else if(buff.length > 20) {
-						    			bitmap = BitmapFactory.decodeByteArray(buff , 0, buff.length);
-										imageView1.setImageBitmap(bitmap);
-						    		}
-					    		}
-							});
-						} catch (EOFException e) {
-							runOnUiThread(new Runnable() {
-								public void run() {
-									Toast.makeText(getApplicationContext()
-											, "Connection Down"
-											, Toast.LENGTH_SHORT).show();
-								}
-							});
-							task_state = false;
-							finish();
-							Log.e(TAG, e.toString());
-						} catch (NumberFormatException e) {
-							Log.e(TAG, e.toString());
-						} catch (UnknownHostException e) {
-							Log.e(TAG, e.toString());
-						} catch (IOException e) {
-							Log.e(TAG, e.toString());
-						}
-					}
-				} catch (NumberFormatException e) {
-					Log.e(TAG, e.toString());
-				} catch (UnknownHostException e) {
-					Log.e(TAG, e.toString());
-				} catch (IOException e) {
-					Log.e(TAG, e.toString());
-					runOnUiThread(new Runnable() {
-						public void run() {
-							Toast.makeText(getApplicationContext()
-									, "Connection Failed"
-									, Toast.LENGTH_SHORT).show();
-						}
-					});
-					finish();
-				}
-			}
-		};
-		new Thread(readThread).start();
+	public void wpPlus(View view) {
+		send("WPPLUS");
+	}
 
-		send("MC/" + 1500 + "/" + 1500);
+	public void disthp(View view) {
+		send("DISTHP");
+	}
 
+	public void disthm(View view) {
+		send("DISTHM");
 	}
 	
 	public void onPause() {
 		super.onPause();
 
 		task_state = false;
+		
+		finish();
+	}
+
+	public void start(View view) {
+		sendInt(1);
+	}
+
+	public void cancel(View view) {
+		sendInt(0);
+	}
+
+	public void sendInt(int num) {
 		try {
-			s.close();
-			out.close();
-			dos.close();
+			dos.writeInt(num);
+			out.flush();
 		} catch (IOException e) {
 			Log.e(TAG, e.toString());
 		} catch (NullPointerException e) {
 			Log.e(TAG, e.toString());
 		}
-		
-		finish();
 	}
-	
+
 	public void sendString(String str) {
 		try {
 			dos.writeInt(str.length());

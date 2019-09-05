@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 public class IOIOConnection extends Activity {
 	TextView txtQuality;
+	EditText wpMode;
 	EditText etxtPass;
 	SeekBar barQuality;
 	Button buttonOK;
@@ -47,7 +48,9 @@ public class IOIOConnection extends Activity {
 	    
 		etxtPass = (EditText)findViewById(R.id.etxtPass);
 	    etxtPass.setText(settings.getString("Pass", ""));
-	    
+
+	    wpMode = (EditText)findViewById(R.id.wpmode);
+
 	    Camera mCamera = null;
     	if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.GINGERBREAD) {
 	    	mCamera = Camera.open();
@@ -100,7 +103,7 @@ public class IOIOConnection extends Activity {
 
 	    txtQuality = (TextView)findViewById(R.id.txtQuality);
 	    txtQuality.setText("Image Quality " + String.valueOf(settings.getInt("Quality", 100)) + "%");
-	    	    
+
 	    barQuality = (SeekBar)findViewById(R.id.barQuality);
 	    barQuality.setProgress(settings.getInt("Quality", 100));
 	    barQuality.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -139,6 +142,7 @@ public class IOIOConnection extends Activity {
 					intent.putExtra("Pass", etxtPass.getText().toString());
 					intent.putExtra("Size", cameraSize);
 					intent.putExtra("Quality", barQuality.getProgress());
+					intent.putExtra("Wpmode", wpMode.getText().toString());
 					startActivity(intent);
 					
 				} else {

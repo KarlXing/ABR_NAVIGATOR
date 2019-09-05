@@ -30,7 +30,48 @@
 	        android:text="Speed 0"
 	        android:textColor="#ca2559"
 	        android:textSize="@dimen/data_text_size" />
- 
+
+        <TextView
+            android:id="@+id/txtgps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="gps"
+            android:textColor="#ca2559"
+            android:textSize="@dimen/data_text_size" />
+
+        <TextView
+            android:id="@+id/txtdest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbarSize="@dimen/data_text_size"
+            android:text="dest location"
+            android:textColor="#ca2559"
+            android:textSize="@dimen/data_text_size" />
+
+        <TextView
+            android:id="@+id/bhn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="auto, bearing, heading"
+            android:textColor="#ca2559"
+            android:textSize="@dimen/data_text_size" />
+
+        <TextView
+            android:id="@+id/sonar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="sonars"
+            android:textColor="#ca2559"
+            android:textSize="@dimen/data_text_size" />
+
+        <TextView
+            android:id="@+id/txtRwd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reward"
+            android:textColor="#ca2559"
+            android:textSize="@dimen/data_text_size" />
+
         <ImageView
             android:id="@+id/imagePreview"
             android:layout_width="wrap_content"
@@ -127,8 +168,22 @@
                 android:enabled="false" />
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/taskBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="switchTaskState"
+            android:text="TaskState" />
+
+        <Button
+            android:id="@+id/SerotoninBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="switchSerotonin"
+            android:text="Switch Serotonin" />
     </LinearLayout>
-    
+
 </RelativeLayout>
 
 

@@ -50,14 +50,14 @@ public class Main extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); 
 		overridePendingTransition(0, 0);  // no animation
         setContentView(R.layout.main);
-//        btnController = (Button)findViewById(R.id.btnController);
-//        btnController.setVisibility(View.INVISIBLE);
-//        btnController.setOnClickListener(new OnClickListener() {
-//        	public void onClick(View v) {
-//        		Intent intent = new Intent(Main.this, ControllerConnection.class);
-//        		startActivity(intent);
-//        	}
-//        });
+        btnController = (Button)findViewById(R.id.btnController);
+        btnController.setVisibility(View.INVISIBLE);
+        btnController.setOnClickListener(new OnClickListener() {
+        	public void onClick(View v) {
+        		Intent intent = new Intent(Main.this, ControllerConnection.class);
+        		startActivity(intent);
+        	}
+        });
 
         btnIOIO = (Button)findViewById(R.id.btnIOIO);
 		btnIOIO.setVisibility(View.INVISIBLE);
@@ -88,8 +88,8 @@ public class Main extends Activity {
 						, Animation.RELATIVE_TO_SELF, (float)0);
 				aa.setDuration(1000);
 				aa.setInterpolator(new DecelerateInterpolator());
-//				btnController.startAnimation(aa);
-//				btnController.setVisibility(View.VISIBLE);
+				btnController.startAnimation(aa);
+				btnController.setVisibility(View.VISIBLE);
 				
 		        aa = new TranslateAnimation(Animation.RELATIVE_TO_SELF, (float)0
 						, Animation.RELATIVE_TO_SELF, (float)0

@@ -98,7 +98,27 @@
 			        android:maxLength="10"
 			        android:textColor="#fe3e7a"
 			        android:textSize="@dimen/connection_text_size"
-	            	android:singleLine="true"  />	    
+	            	android:singleLine="true"  />
+
+				<TextView
+					android:id="@+id/textView"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="waypoints mode"
+					android:textColor="#ca2559"
+					android:textSize="@dimen/connection_text_size" />
+
+				<EditText
+					android:id="@+id/wpmode"
+					android:layout_width="@dimen/edit_text_width"
+					android:layout_height="@dimen/edit_text_height"
+					android:background="@drawable/control_edittext"
+					android:ems="10"
+					android:gravity="center_horizontal"
+					android:inputType="textPersonName"
+					android:text="0"
+					android:textColor="#fe3e7a"
+					android:textSize="@dimen/connection_text_size" />
 			</LinearLayout>
 		</LinearLayout>
 
