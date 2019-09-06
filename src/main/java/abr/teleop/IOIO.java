@@ -9,6 +9,7 @@ import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +27,7 @@ import java.nio.*;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Sensor;
@@ -87,8 +89,9 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
     SurfaceView mPreview;
     int startTime = 0;
 
-    boolean write = false;
-    
+    Bitmap bitmap;
+	ByteArrayOutputStream bos;
+
 	IOIOService ioio;
 	OutputStream out;
 	DataOutputStream dos;
@@ -138,8 +141,10 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 	//gps movement variables
 	int turn_left = 1425;
 	int turn_right = 1575;
+	int turn_left_sharp = 1400;
+	int turn_right_sharp = 1600;
 	int turn_none = 1500;
-	int forward_fast = 1700;
+	int forward_fast = 1800;
 	int forward_stop = 1500;
 	int forward_slow = 1600;
 	boolean reachedWayPt = false;
@@ -163,6 +168,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 
     // variables for writing out data
 	File rrFile;
+	File jpgFile;
 	File recordingFile;
 	FileOutputStream fosRR;
 
@@ -293,6 +299,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 								auto_navigation = false;
 								skipWayPt = true;
 								locInx = randNumGen.nextInt(waypoints.size() - (locInx+1)) + (locInx + 1);
+								dest_loc = waypoints.get(locInx);
 								toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
 								toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_INCALL_LITE, 1000);
 							}
@@ -356,11 +363,20 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 				if (!rrFile.exists()) {
 					rrFile.mkdirs();
 				}
+				jpgFile = new File(Environment.getExternalStorageDirectory()+"/lineFollowJPG/"+time);
+				if (!jpgFile.exists()) {
+					jpgFile.mkdir();
+				}
+
 			} else {
 				//rrFile = new File(externalDirs[0].getAbsolutePath() + "/rescuerobotics/"+time);
 				rrFile = new File(Environment.getExternalStorageDirectory() + "/lineFollow/");
 				if (!rrFile.exists()) {
 					rrFile.mkdirs();
+				}
+				jpgFile = new File(Environment.getExternalStorageDirectory() + "/lineFollowJPG/"+time);
+				if (!jpgFile.exists()) {
+					jpgFile.mkdir();
 				}
 			}
 			Log.d("lineFollow", "created directory " + Environment.getExternalStorageDirectory() + "/lineFollow/");
@@ -596,7 +612,23 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 					Log.i("send image ", Integer.toString(array.length));
 					sendObs(array);
 					move = 0;
+
+					bitmap = Bitmap.createBitmap(rgbs, w, h, Bitmap.Config.ARGB_8888);
+					bos = new ByteArrayOutputStream();
+					bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+
+					try {
+						String mill_timestamp = System.currentTimeMillis()+"";
+						File file = new File(jpgFile, mill_timestamp + ".jpg");
+						file.createNewFile();
+						FileOutputStream fos = new FileOutputStream(file);
+						fos.write(bos.toByteArray());
+						fos.close();
+					} catch (Exception e) {
+						Log.e("app.main", "Couldn't write to SD");
+					}
 				}
+
 			} catch (OutOfMemoryError e) {
 				Toast.makeText(getApplicationContext()
 						, "Out of memory,  please decrease image quality"
@@ -605,6 +637,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 				finish();
 			}
 		}
+
 	}
 	
 	public void decodeYUV420(int[] rgb, byte[] yuv420, int width, int height) {
@@ -1277,7 +1310,7 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 				gps_pwm_speed = forward_stop;
 				gps_pwm_steering = turn_none;
 			} else {
-				if (Math.abs(bearing-heading) < 5 || Math.abs(bearing-heading) > 355) {
+				if (Math.abs(bearing-heading) < 10 || Math.abs(bearing-heading) > 350) {
 					gps_pwm_steering = turn_none;
 				}
 				else if (heading > bearing) {
@@ -1309,17 +1342,17 @@ public class IOIO extends IOIOActivity implements Callback, SensorEventListener,
 			}
 			// If left sonar close, turn right
 			else if (sonar1_reading < 12){
-				gps_pwm_speed = forward_slow;
-				gps_pwm_steering = turn_right;
-				pwm_speed = forward_slow;
-				pwm_steering = turn_right;
+				gps_pwm_speed = forward_fast;
+				gps_pwm_steering = turn_right_sharp;
+				pwm_speed = forward_fast;
+				pwm_steering = turn_right_sharp;
 			}
 			// If right sonar close, turn left
 			else if (sonar3_reading < 12){
-				gps_pwm_speed = forward_slow;
-				gps_pwm_steering = turn_left;
-				pwm_speed = forward_slow;
-				pwm_steering = turn_left;
+				gps_pwm_speed = forward_fast;
+				gps_pwm_steering = turn_left_sharp;
+				pwm_speed = forward_fast;
+				pwm_steering = turn_left_sharp;
 			}
 
         	if (!taskstate) {
